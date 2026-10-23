@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  test:
+    name: lint-and-test (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: System packages (ffmpeg CLI for tests/fake_ezcam.py)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" build
+      - name: Lint
+        run: ruff check .
+      - name: Build sdist + wheel
+        run: python -m build
+      # Virtual devices (OBS Virtual Camera, VB-CABLE, BlackHole, v4l2loopback, PipeWire) are not
+      # available on hosted runners; those tests skip themselves. Check them by hand before a release.
+      - name: Test
+        run: pytest -q -rs

@@ -1,0 +1,135 @@
+# Tag-triggered release: PyInstaller apps for Windows, Linux and macOS.
+# Builds are unsigned (no paid certificates). Integrity: free GitHub artifact
+# attestations (build provenance), verifiable with `gh attestation verify`.
+name: Release
+on:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: read
+jobs:
+  check:
+    name: check (tag, lint, tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: System packages (ffmpeg CLI for tests/fake_ezcam.py)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,keyring]"
+      - name: Tag matches __version__
+        run: |
+          VERSION="$(python -c 'import streambridge; print(streambridge.__version__)')"
+          if [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match __version__ $VERSION (expected v$VERSION)"
+            exit 1
+          fi
+      - name: Lint
+        run: ruff check .
+      - name: Test
+        run: pytest -q -rs
+
+  build:
+    needs: check
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            spec: packaging/windows.spec
+            asset: windows-x64.zip
+          - os: ubuntu-22.04          # older glibc = runs on more distros
+            spec: packaging/linux.spec
+            asset: linux-x64.tar.gz
+          - os: macos-latest          # Apple Silicon (arm64)
+            spec: packaging/macos.spec
+            asset: macos-arm64.zip
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,keyring]"   # keyring: "Remember password" in the apps
+      # End-user builds only. The developer scripts (scripts/<os>/...) are NOT run
+      # here and are NOT shipped in the artifacts.
+      - name: PyInstaller
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            pyinstaller --noconfirm --clean --distpath dist --workpath build ${{ matrix.spec }}            # StreamBridge.app
+          else
+            pyinstaller --noconfirm --clean --distpath dist --workpath build ${{ matrix.spec }} -- --onefile
+          fi
+      - name: Smoke test (Linux, console build)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          dist/StreamBridge --version | tee "$RUNNER_TEMP/version.txt"
+          grep -qx "StreamBridge ${GITHUB_REF_NAME#v}" "$RUNNER_TEMP/version.txt"
+      - name: Package
+        shell: bash
+        run: |
+          NAME="StreamBridge-${GITHUB_REF_NAME}-${{ matrix.asset }}"
+          STAGE="stage/StreamBridge-${GITHUB_REF_NAME}"
+          mkdir -p release_assets "$STAGE"
+          case "$RUNNER_OS" in
+            Windows)
+              cp dist/StreamBridge.exe packaging/user/windows/READ-ME-FIRST.txt "$STAGE/"
+              (cd stage && 7z a -tzip "../release_assets/$NAME" "StreamBridge-${GITHUB_REF_NAME}") ;;
+            Linux)
+              cp dist/StreamBridge packaging/user/linux/READ-ME-FIRST.txt packaging/user/linux/start-streambridge.sh "$STAGE/"
+              chmod +x "$STAGE/StreamBridge" "$STAGE/start-streambridge.sh"
+              tar -C stage -czf "release_assets/$NAME" "StreamBridge-${GITHUB_REF_NAME}" ;;
+            macOS)
+              cp -R dist/StreamBridge.app packaging/user/macos/READ-ME-FIRST.txt "$STAGE/"
+              ditto -c -k --keepParent "$STAGE" "release_assets/$NAME" ;;
+          esac
+          ls -l release_assets
+      # Free provenance attestation. Note: on PRIVATE repos GitHub only supports attestations on
+      # Enterprise Cloud plans, so the step is skipped while the repo is private.
+      - name: Attest build provenance
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: release_assets/StreamBridge-*
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.asset }}
+          path: release_assets/*
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: release_assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            release_assets/StreamBridge-*
+          generate_release_notes: true
+          draft: false
+          prerelease: false

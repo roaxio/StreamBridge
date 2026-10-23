@@ -1,0 +1,17 @@
+StreamBridge for macOS
+======================
+Use your phone (e.g. the EZ-Cam app) as this Mac's camera and microphone.
+
+1. Move StreamBridge.app to Applications and open it. No Python needed.
+   The app is not code-signed, so Gatekeeper may block it the first time: right-click (Control-click)
+   StreamBridge.app > Open > Open. Or in Terminal:  xattr -dr com.apple.quarantine /Applications/StreamBridge.app
+2. The "Welcome / Setup check" window shows what is still missing, with links to the official pages:
+   - OBS Studio 26+ (gives the camera "OBS Virtual Camera"): https://obsproject.com/download
+     Open OBS once, click "Start Virtual Camera" and allow the system extension, then quit OBS.
+   - BlackHole 2ch (gives the microphone "BlackHole 2ch"):   https://existential.audio/blackhole/
+   Then click "Re-check". StreamBridge itself never installs anything.
+3. Paste the video and/or audio URL your phone app shows and click Connect.
+4. In your apps pick camera "OBS Virtual Camera" and microphone "BlackHole 2ch".
+
+Note: Apple Silicon (arm64) build. To uninstall, delete the app and
+~/Library/Application Support/StreamBridge.

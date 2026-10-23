@@ -1,0 +1,46 @@
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build artifacts & caches
+build/
+dist/
+__pycache__/
+*.pyc
+*.egg-info/
+src/*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+release_assets/
+stage/
+*.log
+
+# Local configs
+*.local
+*.local.*
+local_settings.py
+
+# Editors & OS metadata
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets, keystores & certificates
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.keystore
+*.jks
+*.crt
+*.cer
+*.der

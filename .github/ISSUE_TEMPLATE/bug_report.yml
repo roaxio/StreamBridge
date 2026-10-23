@@ -1,0 +1,54 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "**Remove passwords** from any URL or log before posting (StreamBridge logs are already masked)."
+  - type: input
+    id: version
+    attributes:
+      label: StreamBridge version
+      placeholder: "e.g. from Help > About or `streambridge --version`; standalone or from source?"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows 11, Windows 10, Linux, macOS, Other]
+    validations:
+      required: true
+  - type: input
+    id: drivers
+    attributes:
+      label: Virtual device software and versions
+      placeholder: "OBS 30.2, VB-CABLE 3.3.1.7 / PipeWire 1.0 / BlackHole 2ch 0.6"
+  - type: input
+    id: source
+    attributes:
+      label: Stream source
+      placeholder: "EZ-Cam 1.x, MJPEG over http, audio.wav over https"
+  - type: dropdown
+    id: part
+    attributes:
+      label: Affected part
+      options: [Camera, Microphone, Both, Window/GUI, Command line, Standalone build]
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs. actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log excerpt
+      description: "Windows: %LOCALAPPDATA%\\StreamBridge\\streambridge.log. Or run with -v."
+      render: text

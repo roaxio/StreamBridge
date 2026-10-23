@@ -1,0 +1,18 @@
+StreamBridge for Windows
+========================
+Use your phone (e.g. the EZ-Cam app) as this PC's camera and microphone.
+
+1. Double-click StreamBridge.exe. No installation and no Python needed.
+   Windows SmartScreen may say "Windows protected your PC" because the app is not code-signed:
+   click "More info" > "Run anyway". (You can verify the download, see the project page.)
+2. The "Welcome / Setup check" window shows what is still missing, with links to the official pages:
+   - OBS Studio 26+ (gives the camera "OBS Virtual Camera"): https://obsproject.com/download
+   - VB-CABLE (gives the microphone "CABLE Output"):        https://vb-audio.com/Cable/
+   Install them once, then click "Re-check". StreamBridge itself never installs anything.
+3. Paste the video and/or audio URL your phone app shows, e.g. http://192.168.1.5:8080/video,
+   and click Connect.
+4. In Zoom/Teams/Discord/OBS/browser pick camera "OBS Virtual Camera" and microphone "CABLE Output".
+
+Settings and logs: %APPDATA%\StreamBridge and %LOCALAPPDATA%\StreamBridge. "Reset to defaults" removes them.
+To uninstall: delete StreamBridge.exe (and optionally the two folders above).
+Help menu > "Welcome / Setup check" reopens the check at any time.

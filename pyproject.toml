@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "streambridge"
+dynamic = ["version"]   # single source: src/streambridge/__init__.py (__version__)
+description = "Use a phone's video/audio stream URLs (e.g. EZ-Cam) as this computer's camera and microphone."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "StreamBridge contributors" }]
+requires-python = ">=3.10,<3.14"
+classifiers = [
+  "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13",
+  "Operating System :: Microsoft :: Windows", "Operating System :: POSIX :: Linux", "Operating System :: MacOS",
+]
+dependencies = [
+  "av>=12",               # FFmpeg (wheels bundle the FFmpeg libraries)
+  "numpy>=1.24",
+  "pyvirtualcam>=0.11",   # OBS Virtual Camera (Win/macOS), v4l2loopback (Linux)
+  "sounddevice>=0.4.6",   # PortAudio (bundled in the Windows/macOS wheels); Windows: MME fallback only
+  "pysdl2>=0.9.16; sys_platform == 'win32'",      # Windows mic output: SDL2 WASAPI shared mode (like ffplay)
+  "pysdl2-dll>=2.28; sys_platform == 'win32'",    # bundled SDL2.dll
+]
+
+[project.urls]
+Homepage = "https://github.com/roaxio/StreamBridge"
+Repository = "https://github.com/roaxio/StreamBridge"
+Issues = "https://github.com/roaxio/StreamBridge/issues"
+
+[project.optional-dependencies]
+keyring = ["keyring>=24"]
+dev = ["pytest>=7", "pyinstaller>=6.10", "ruff>=0.6"]
+
+[project.scripts]
+streambridge = "streambridge.cli:main"
+
+[project.gui-scripts]
+streambridge-gui = "streambridge.gui:run_gui"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.dynamic]
+version = { attr = "streambridge.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["streambridge*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["packaging/*.spec"]
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# Correctness only (syntax errors, undefined names, unused imports...). Style is not enforced yet.
+select = ["E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F841"]
