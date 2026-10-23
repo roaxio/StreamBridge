@@ -1,6 +1,6 @@
 <h1 align="center">StreamBridge</h1>
 
-<p align="center"><em>Turn your phone's camera and mic streams (e.g. EZ-Cam) into a real webcam and microphone on Windows, Linux, and macOS.</em></p>
+<p align="center"><em>Turn your phone's camera and mic streams (e.g. EZ-Cam-Mic) into a real webcam and microphone on Windows, Linux, and macOS.</em></p>
 
 <p align="center">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
@@ -22,7 +22,7 @@
 
 ## Quick Overview
 
-StreamBridge connects to video and audio streams broadcast by your mobile phone (such as EZ-Cam, IP Webcam, or RTSP apps) and outputs them directly to standard virtual devices. Apps like **Zoom, Microsoft Teams, Discord, OBS Studio**, or browser meetings recognize StreamBridge immediately as physical hardware.
+StreamBridge connects to video and audio streams broadcast by your mobile phone (such as EZ-Cam-Mic, IP Webcam, or RTSP apps) and outputs them directly to standard virtual devices. Apps like **Zoom, Microsoft Teams, Discord, OBS Studio**, or browser meetings recognize StreamBridge immediately as physical hardware.
 
 ```text
 Video URL:  http://192.168.1.5:8080/video        (or just 192.168.1.5:8080/video)
